@@ -1,15 +1,7 @@
-interface PetProps {
-  name: string;
-}
-
-function PetComponent({ name }: PetProps) {
-  return <div>{name}</div>;
-}
-
 export default function Home() {
   return (
     <div>
-      <PetComponent name={'Rex'} />
+      <h1>Pet-Shop</h1>
     </div>
   );
 }
