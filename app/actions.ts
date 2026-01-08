@@ -102,3 +102,28 @@ export async function updateAppointment(id: string, data: AppointmentData) {
     console.log(err);
   }
 }
+
+export async function deleteAppointment(id: string) {
+  try {
+    const existingAppointment = await prisma.appointment.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!existingAppointment) {
+      return {
+        error: 'Agendamento nao encontrado',
+      };
+    }
+
+    await prisma.appointment.delete({
+      where: {
+        id,
+      },
+    });
+    revalidatePath('/');
+  } catch (err) {
+    console.log(err);
+  }
+}
