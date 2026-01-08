@@ -28,25 +28,29 @@ import {
   Phone,
   User,
 } from 'lucide-react';
-
 import z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IMaskInput } from 'react-imask';
 import { format, setHours, setMinutes, startOfToday } from 'date-fns';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { Calendar } from '../ui/calendar';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
+} from '@/components/ui/select';
 import { toast } from 'sonner';
-import { createAppointment } from '@/app/actions';
-import { useState } from 'react';
+import { createAppointment, updateAppointment } from '@/app/actions';
+import { useEffect, useState } from 'react';
+import { Appointment } from '@/types/appointments';
 
 const appointmentFormSchema = z
   .object({
@@ -79,7 +83,15 @@ const appointmentFormSchema = z
   );
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
 
-export function AppointmentForm() {
+type AppointmentFormProps = {
+  appointment?: Appointment;
+  children?: React.ReactNode;
+};
+
+export function AppointmentForm({
+  appointment,
+  children,
+}: AppointmentFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
@@ -97,26 +109,37 @@ export function AppointmentForm() {
     const scheduleAt = new Date(data.scheduleAt);
     scheduleAt.setHours(Number(hour), Number(minute), 0, 0);
 
-    const result = await createAppointment({
-      ...data,
-      scheduleAt,
-    });
+    const isEdit = !!appointment?.id;
+
+    const result = isEdit
+      ? await updateAppointment(appointment.id, {
+          ...data,
+          scheduleAt,
+        })
+      : await createAppointment({
+          ...data,
+          scheduleAt,
+        });
 
     if (result?.error) {
       toast.error(result.error);
       return;
     }
 
-    toast.success(`Agendamento realizado com sucesso!`);
+    toast.success(
+      `Agendamento ${isEdit ? 'atualizado com sucesso!' : 'realizado com sucesso!'}`
+    );
     setIsOpen(false);
     form.reset();
   };
 
+  useEffect(() => {
+    form.reset(appointment);
+  }, [appointment, form]);
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="brand">Novo agendamento</Button>
-      </DialogTrigger>
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
 
       <DialogContent
         variant="appointment"

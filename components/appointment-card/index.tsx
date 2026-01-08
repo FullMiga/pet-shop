@@ -1,5 +1,8 @@
 import { cn } from '@/lib/utils';
 import { Appointment } from '@/types/appointments';
+import { AppointmentForm } from '../appointment-form';
+import { Button } from '../ui/button';
+import { Pen as EditIcon } from 'lucide-react';
 
 type AppointmentCardProps = {
   appointment: Appointment;
@@ -13,7 +16,7 @@ export function AppointmentCard({
   return (
     <div
       className={cn(
-        'flex flex-col md:flex-row justify-between p-4',
+        'flex flex-col md:flex-row justify-between items-center p-4',
         hasMore && 'border-b border-border-divisor'
       )}
     >
@@ -32,7 +35,11 @@ export function AppointmentCard({
         </div>
       </div>
       <div className="text-paragraph-small-size text-content-secondary ml-auto">
-        Remover agendamento
+        <AppointmentForm appointment={appointment}>
+          <Button variant="edit" size="icon">
+            <EditIcon size={16} />
+          </Button>
+        </AppointmentForm>
       </div>
     </div>
   );
